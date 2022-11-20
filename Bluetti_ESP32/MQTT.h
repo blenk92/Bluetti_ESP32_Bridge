@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "DeviceType.h"
 
+extern String map_field_name(enum field_names f_name);
 extern void publishTopic(enum field_names field_name, String value);
 extern void publishDeviceState();
 extern void handleMQTT();

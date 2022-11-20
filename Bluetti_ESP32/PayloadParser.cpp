@@ -1,6 +1,7 @@
 #include "BluettiConfig.h"
 #include "MQTT.h"
 #include "PayloadParser.h"
+#include "DataStore.h"
 
 
 uint16_t parse_uint_field(uint8_t data[]){
@@ -75,33 +76,33 @@ void pase_bluetooth_data(uint8_t page, uint8_t offset, uint8_t* pData, size_t le
                 switch (bluetti_device_state[i].f_type){
                  
                   case UINT_FIELD:
-                    publishTopic(bluetti_device_state[i].f_name, String(parse_uint_field(data_payload_field)));
+                    ds.updateValue(bluetti_device_state[i].f_name, String(parse_uint_field(data_payload_field)));
                     break;
     
                   case BOOL_FIELD:
-                    publishTopic(bluetti_device_state[i].f_name, String((int)parse_bool_field(data_payload_field)));
+                    ds.updateValue(bluetti_device_state[i].f_name, String((int)parse_bool_field(data_payload_field)));
                     break;
     
                   case DECIMAL_FIELD:
-                    publishTopic(bluetti_device_state[i].f_name, String(parse_decimal_field(data_payload_field, bluetti_device_state[i].f_scale ), 2) );
+                    ds.updateValue(bluetti_device_state[i].f_name, String(parse_decimal_field(data_payload_field, bluetti_device_state[i].f_scale ), 2) );
                     break;
     
                   case SN_FIELD:  
                     char sn[16];
                     sprintf(sn, "%lld", parse_serial_field(data_payload_field));
-                    publishTopic(bluetti_device_state[i].f_name, String(sn));
+                    ds.updateValue(bluetti_device_state[i].f_name, String(sn));
                     break;
     
                   case VERSION_FIELD:
-                    publishTopic(bluetti_device_state[i].f_name, String(parse_version_field(data_payload_field),2) );    
+                    ds.updateValue(bluetti_device_state[i].f_name, String(parse_version_field(data_payload_field),2) );    
                     break;
 
                   case STRING_FIELD:
-                    publishTopic(bluetti_device_state[i].f_name, parse_string_field(data_payload_field));
+                    ds.updateValue(bluetti_device_state[i].f_name, parse_string_field(data_payload_field));
                     break;
 
                   case ENUM_FIELD:
-                    publishTopic(bluetti_device_state[i].f_name, pase_enum_field(data_payload_field));
+                    ds.updateValue(bluetti_device_state[i].f_name, pase_enum_field(data_payload_field));
                     break;
                   default:
                     break;

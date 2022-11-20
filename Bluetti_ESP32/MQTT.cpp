@@ -3,6 +3,7 @@
 #include "BWifi.h"
 #include "BTooth.h"
 #include "utils.h"
+#include "DataStore.h"
 
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -155,6 +156,8 @@ void initMQTT(){
     
     client.setServer(settings.mqtt_server, atoi(settings.mqtt_port));
     client.setCallback(callback);
+
+    ds.setCallback(publishTopic);
 
     bool connect_result;
     const char connect_id[] = "Bluetti_ESP32";
