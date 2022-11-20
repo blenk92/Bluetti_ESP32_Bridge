@@ -10,7 +10,6 @@
 WebServer server(80);
 bool shouldSaveConfig = false;
 
-char mqtt_server[40] = "127.0.0.1";
 char mqtt_port[6]  = "1883";
 char bluetti_device_id[40] = "e.g. ACXXXYYYYYYYY";
 
@@ -51,7 +50,7 @@ void initBWifi(bool resetWifi){
     wifiConfig = defaults;
   }
 
-  WiFiManagerParameter custom_mqtt_server("server", "MQTT Server Address", mqtt_server, 40);
+  WiFiManagerParameter custom_mqtt_server("server", "MQTT Server Address", "", 40);
   WiFiManagerParameter custom_mqtt_port("port", "MQTT Server Port", mqtt_port, 6);
   WiFiManagerParameter custom_mqtt_username("username", "MQTT Username", "", 40);
   WiFiManagerParameter custom_mqtt_password("password", "MQTT Password", "", 40, "type=password");

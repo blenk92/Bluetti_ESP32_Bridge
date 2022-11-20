@@ -145,10 +145,20 @@ void publishDeviceState(){
  
 }
 
+bool enabled = false;
+
 void initMQTT(){
 
     enum field_names f_name;
     ESPBluettiSettings settings = get_esp32_bluetti_settings();
+
+    if (settings.mqtt_server == "" or settings.mqtt_port == "") {
+        Serial.print("No MQTT Settings");
+        enabled = false;
+    } else {
+        enabled = true;
+    }
+
     Serial.print("Connecting to MQTT at: ");
     Serial.print(settings.mqtt_server);
     Serial.print(":");
@@ -182,26 +192,27 @@ void initMQTT(){
 };
 
 void handleMQTT(){
-    if ((millis() - lastMQTTMessage) > (MAX_DISCONNECTED_TIME_UNTIL_REBOOT * 60000)){ 
-      Serial.println(F("MQTT is disconnected over allowed limit, reboot device"));
-      ESP.restart();
-    }
-      
-    if ((millis() - previousDeviceStatePublish) > (DEVICE_STATE_UPDATE * 60000)){ 
-      publishDeviceState();
-    }
+    if (enabled) {
+      if ((millis() - lastMQTTMessage) > (MAX_DISCONNECTED_TIME_UNTIL_REBOOT * 60000)){ 
+        Serial.println(F("MQTT is disconnected over allowed limit, reboot device"));
+        ESP.restart();
+      }
 
-    if (!isMQTTconnected() && publishErrorCount > 50){
-      Serial.println(F("MQTT lost connection, try to reconnet"));
-      client.disconnect();
-      lastMQTTMessage=0;
-      previousDeviceStatePublish=0;
-      publishErrorCount=0;
-      initMQTT();
+      if ((millis() - previousDeviceStatePublish) > (DEVICE_STATE_UPDATE * 60000)){ 
+        publishDeviceState();
+      }
 
+      if (!isMQTTconnected() && publishErrorCount > 50){
+        Serial.println(F("MQTT lost connection, try to reconnet"));
+        client.disconnect();
+        lastMQTTMessage=0;
+        previousDeviceStatePublish=0;
+        publishErrorCount=0;
+        initMQTT();
+      }
+
+      client.loop();
     }
-    
-    client.loop();
 }
 
 bool isMQTTconnected(){

@@ -13,7 +13,9 @@ void DataStore::updateValue(enum field_names field_name, const String& value) {
     Serial.println(map_field_name(field_name) + ": " + value );
     std::lock_guard<std::mutex> guard(mutex); 
     values[field_name] = value;
-    (*callback)(field_name, value);
+    if (callback) {
+        (*callback)(field_name, value);
+    }
 }
 
 String DataStore::getValue(enum field_names field_name) {
