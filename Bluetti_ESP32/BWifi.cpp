@@ -2,6 +2,7 @@
 #include "BWifi.h"
 #include "BTooth.h"
 #include "MQTT.h"
+#include "web.h"
 #include <EEPROM.h>
 #include <WiFiManager.h>
 #include <WebServer.h>
@@ -58,7 +59,7 @@ void initBWifi(bool resetWifi){
     wifiConfig = defaults;
     eeprom_saveconfig();
   }
-  if (wifiConfig.salt != EEPROM_SALT) {
+  else if (wifiConfig.salt != EEPROM_SALT) {
     Serial.println("Invalid settings in EEPROM, trying with defaults");
     ESPBluettiSettings defaults;
     wifiConfig = defaults;
@@ -114,7 +115,7 @@ void initBWifi(bool resetWifi){
       initBWifi(true);
   });
   
-  
+  initWeb(server);     
 
   server.onNotFound(handleNotFound);
 

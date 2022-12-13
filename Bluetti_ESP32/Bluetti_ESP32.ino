@@ -2,7 +2,7 @@
 #include "BTooth.h"
 #include "MQTT.h"
 #include "config.h"
-#include "web.h"
+//#include "web.h"
 
 void setup() {
   Serial.begin(115200);
@@ -16,12 +16,12 @@ void setup() {
   initBWifi(false);
   initBluetooth();
   initMQTT();
-  initWeb();
+  //initWeb();
 }
 
 void loop() {
   handleBluetooth();
   handleMQTT(); 
   handleWebserver();
-  handleWeb();
+  //handleWeb();
 }

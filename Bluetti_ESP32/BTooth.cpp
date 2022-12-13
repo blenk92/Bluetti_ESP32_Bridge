@@ -31,6 +31,7 @@ class MyClientCallback : public BLEClientCallbacks {
       #endif
       digitalWrite(RELAIS_PIN, RELAIS_LOW);
     #endif
+    ESP.restart();
   }
 };
 

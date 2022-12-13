@@ -192,27 +192,25 @@ void initMQTT(){
 };
 
 void handleMQTT(){
-    if (enabled) {
-      if ((millis() - lastMQTTMessage) > (MAX_DISCONNECTED_TIME_UNTIL_REBOOT * 60000)){ 
-        Serial.println(F("MQTT is disconnected over allowed limit, reboot device"));
-        ESP.restart();
-      }
+  if ((millis() - lastMQTTMessage) > (MAX_DISCONNECTED_TIME_UNTIL_REBOOT * 60000)){ 
+    Serial.println(F("MQTT is disconnected over allowed limit, reboot device"));
+    ESP.restart();
+  }
 
-      if ((millis() - previousDeviceStatePublish) > (DEVICE_STATE_UPDATE * 60000)){ 
-        publishDeviceState();
-      }
+  if ((millis() - previousDeviceStatePublish) > (DEVICE_STATE_UPDATE * 60000)){ 
+    publishDeviceState();
+  }
 
-      if (!isMQTTconnected() && publishErrorCount > 50){
-        Serial.println(F("MQTT lost connection, try to reconnet"));
-        client.disconnect();
-        lastMQTTMessage=0;
-        previousDeviceStatePublish=0;
-        publishErrorCount=0;
-        initMQTT();
-      }
+  if (!isMQTTconnected() && publishErrorCount > 50){
+    Serial.println(F("MQTT lost connection, try to reconnet"));
+    client.disconnect();
+    lastMQTTMessage=0;
+    previousDeviceStatePublish=0;
+    publishErrorCount=0;
+    initMQTT();
+  }
 
-      client.loop();
-    }
+  client.loop();
 }
 
 bool isMQTTconnected(){

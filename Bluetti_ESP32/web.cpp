@@ -1,5 +1,4 @@
 #include <WiFi.h>
-#include <WebServer.h>
 
 #include "web.h"
 #include "DataStore.h"
@@ -9,7 +8,6 @@
 #include "BluettiConfig.h"
 #include "utils.h"
 
-WebServer httpServer(80);
 
 void setState(enum field_names field_name, bool enabled) {
     bt_command_t command;
@@ -95,12 +93,13 @@ const char* mainsite PROGMEM = R"""(
 </html>
 )""";
 
-void initWeb() {
-    httpServer.on("/", HTTP_GET, []() {
+void initWeb(WebServer& httpServer) {
+
+    httpServer.on("/panel", HTTP_GET, [&httpServer]() {
     	httpServer.send(200, F("text/html"), mainsite);
     });
 
-    httpServer.on("/values", HTTP_GET, []() {
+    httpServer.on("/values", HTTP_GET, [&httpServer]() {
         bool first = true;
         String s = "{ ";
         for (int i = 0; i < PACK_NUM_MAX; ++i) {
@@ -118,24 +117,17 @@ void initWeb() {
     	httpServer.send(200, F("application/json"), s);
     });
     
-    httpServer.on("/ac_set_state", HTTP_POST, []() {
+    httpServer.on("/ac_set_state", HTTP_POST, [&httpServer]() {
         String v = httpServer.arg("state");
         setState(AC_OUTPUT_ON, v == "1");
         Serial.println(String("Set AC state to ") + (v == "1" ? "ON" : "OFF"));
      	httpServer.send(200, F("text/html"), F("OK"));
     });
 
-    httpServer.on("/dc_set_state", HTTP_POST, []() {
+    httpServer.on("/dc_set_state", HTTP_POST, [&httpServer]() {
         String v = httpServer.arg("state");
         setState(DC_OUTPUT_ON, v == "1");
         Serial.println(String("Set DC state to ") + (v == "1" ? "ON" : "OFF"));
         httpServer.send(200, F("text/html"), F("OK"));
     });
-
-    httpServer.begin();
-}
-
-
-void handleWeb() {
-    httpServer.handleClient();
 }

@@ -1,6 +1,4 @@
 #pragma once
 
-
-void initWeb();
-void handleWeb();
-
+#include <WebServer.h>
+void initWeb(WebServer& httpServer);
