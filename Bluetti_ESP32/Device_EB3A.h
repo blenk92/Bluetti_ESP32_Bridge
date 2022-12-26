@@ -1,5 +1,5 @@
-#ifndef DEVICE_AC300_H
-#define DEVICE_AC300_H
+#ifndef DEVICE_EB3A_H
+#define DEVICE_EB3A_H
 #include "Arduino.h"
 
 /* Not implemented yet
@@ -27,7 +27,7 @@ enum auto_sleep_mode {
 */
 
 // { FIELD_NAME, PAGE, OFFSET, SIZE, SCALE (if scale is needed e.g. decimal value, defaults to 0) , ENUM (if data is enum, defaults to 0) , FIELD_TYPE }
-static device_field_data_t bluetti_device_state_ac300[] = {
+static device_field_data_t bluetti_device_state_eb3a[] = {
 };
 
 #endif
