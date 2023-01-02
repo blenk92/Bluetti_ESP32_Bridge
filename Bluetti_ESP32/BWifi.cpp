@@ -135,8 +135,9 @@ void handleRoot() {
   server.sendContent("<table border='0'>");
   String data = "<tr><td>host:</td><td>" + WiFi.localIP().toString() + "</td><td><a href='http://"+WiFi.localIP().toString()+"/rebootDevice' target='_blank'>reboot this device</a></td></tr>";
   data = data + "<tr><td>SSID:</td><td>" + WiFi.SSID() + "</td><td><a href='http://"+WiFi.localIP().toString()+"/resetConfig' target='_blank'>reset device config</a></td></tr>";
-  data = data + "<tr><td>WiFiRSSI:</td><td>" + (String)WiFi.RSSI() + "</td></tr>";
-  data = data + "<tr><td>MAC:</td><td>" + WiFi.macAddress() + "</td></tr>";
+  data = data + "<tr><td>WiFiRSSI:</td><td>" + (String)WiFi.RSSI() + "</td><td><a href='http://"+WiFi.localIP().toString()+"/panel' target='_blank'>Web View</a></td></tr>";
+
+  data = data + "<tr><td>MAC:</td><td>" + WiFi.macAddress() + "</td><td><a href='http://"+WiFi.localIP().toString()+"/update' target='_blank'>Update</a></td></tr>";
   data = data + "<tr><td>uptime (ms):</td><td>" + millis() + "</td></tr>";
   data = data + "<tr><td>uptime (h):</td><td>" + millis() / 3600000 + "</td></tr>";
   data = data + "<tr><td>uptime (d):</td><td>" + millis() / 3600000/24 + "</td></tr>";

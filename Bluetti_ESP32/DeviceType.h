@@ -34,7 +34,9 @@ enum field_names {
   FIELD_UNDEFINED,
   INTERNAL_AC_VOLTAGE,
   INTERNAL_CURRENT_ONE,
-  PACK_NUM_MAX
+  PACK_NUM_MAX,
+  INTERNAL_DC_INPUT_VOLTAGE,
+  FIELD_NAMES_LAST
 };
 
 typedef struct device_field_data {

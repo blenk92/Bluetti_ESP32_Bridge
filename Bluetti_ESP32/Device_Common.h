@@ -17,6 +17,8 @@ static device_field_data_t bluetti_device_state_common[] = {
   {TOTAL_BATTERY_PERCENT, 0x00, 0x2B, 1,0,0, UINT_FIELD},
   {AC_OUTPUT_ON,      0x00, 0x30, 1, 0, 0, BOOL_FIELD},
   {DC_OUTPUT_ON,      0x00, 0x31, 1, 0, 0, BOOL_FIELD},
+  {PACK_NUM_MAX,      0x00, 0x5B, 1, 0, 0, UINT_FIELD },
+  {INTERNAL_DC_INPUT_VOLTAGE, 0x00, 0x56, 1, 0, DECIMAL_FIELD},
 };
 
 static device_field_data_t bluetti_device_command[] = {

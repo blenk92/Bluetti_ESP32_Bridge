@@ -72,7 +72,9 @@ String map_field_name(enum field_names f_name){
         break;
       case PACK_NUM_MAX:
         return "pack_max_num";
-      break;
+        break;
+      case INTERNAL_DC_INPUT_VOLTAGE:
+        return "internal_dc_input_voltage";
       default:
         return "unknown";
         break;

@@ -102,7 +102,7 @@ void initWeb(WebServer& httpServer) {
     httpServer.on("/values", HTTP_GET, [&httpServer]() {
         bool first = true;
         String s = "{ ";
-        for (int i = 0; i < PACK_NUM_MAX; ++i) {
+        for (int i = 0; i < FIELD_NAMES_LAST; ++i) {
             String value = ds.getValue((enum field_names)i);
             if (value != "") {
                 if (!first) {
