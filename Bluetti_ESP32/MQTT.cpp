@@ -70,11 +70,16 @@ String map_field_name(enum field_names f_name){
       case INTERNAL_CURRENT_ONE:
         return "internal_current_one";
         break;
+      case PACK_NUM:
+        return "pack_num";
+        break;
       case PACK_NUM_MAX:
         return "pack_max_num";
         break;
       case INTERNAL_DC_INPUT_VOLTAGE:
         return "internal_dc_input_voltage";
+      case CELL_VOLTAGES:
+        return "cell_voltages";
       default:
         return "unknown";
         break;
@@ -121,16 +126,27 @@ void subscribeTopic(enum field_names field_name) {
 
 }
 
-void publishTopic(enum field_names field_name, String value){
+void publishTopic(enum field_names field_name, std::vector<String> value){
   char publishTopicBuf[1024];
 
   ESPBluettiSettings settings = get_esp32_bluetti_settings();
   sprintf(publishTopicBuf, "bluetti/%s/state/%s", settings.bluetti_device_id, map_field_name(field_name).c_str() ); 
-  if (!client.publish(publishTopicBuf, value.c_str() )){
+  String s;
+  if (value.size() == 1) {
+      s = value[0];
+  } else {
+      s = "[" + value[0];
+      for (size_t i = 1; i < value.size(); ++i) {
+            s += ", " + value[i];
+      }
+      s += "]";
+  }
+
+  if (!client.publish(publishTopicBuf, s.c_str() )){
     publishErrorCount++;
   }
+
   lastMQTTMessage = millis();
- 
 }
 
 void publishDeviceState(){

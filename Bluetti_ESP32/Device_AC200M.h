@@ -29,6 +29,8 @@ enum auto_sleep_mode {
 
 // { FIELD_NAME, PAGE, OFFSET, SIZE, SCALE (if scale is needed e.g. decimal value, defaults to 0) , ENUM (if data is enum, defaults to 0) , FIELD_TYPE }
 static device_field_data_t bluetti_device_state_ac200m[] = {
+    {INTERNAL_DC_INPUT_VOLTAGE, 0x00, 0x56, 1, 0, DECIMAL_FIELD},
+    {PACK_VOLTAGE, 0x00, 0x62, 1, 2, DECIMAL_FIELD},
 };
 
 

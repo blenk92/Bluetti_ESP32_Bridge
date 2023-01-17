@@ -9,7 +9,7 @@
 #include "utils.h"
 
 
-void setState(enum field_names field_name, bool enabled) {
+void setState(enum field_names field_name, int enabled) {
     bt_command_t command;
     command.prefix = 0x01;
     command.field_update_cmd = 0x06;
@@ -21,7 +21,7 @@ void setState(enum field_names field_name, bool enabled) {
         }
     }
 
-    command.len = swap_bytes((int)enabled);
+    command.len = swap_bytes(enabled);
     command.check_sum = modbus_crc((uint8_t*)&command,6);
 
     sendBTCommand(command);
@@ -103,8 +103,8 @@ void initWeb(WebServer& httpServer) {
         bool first = true;
         String s = "{ ";
         for (int i = 0; i < FIELD_NAMES_LAST; ++i) {
-            String value = ds.getValue((enum field_names)i);
-            if (value != "") {
+            String value = ds.getValueAsJson((enum field_names)i);
+            if (!value.isEmpty()) {
                 if (!first) {
                     s += ",";
                 } else {

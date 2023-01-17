@@ -3,6 +3,8 @@
 #include "PayloadParser.h"
 #include "DataStore.h"
 #include "BWifi.h"
+#include "web.h"
+#include <vector>
 
 uint16_t parse_uint_field(uint8_t data[]){
     return ((uint16_t) data[0] << 8 ) | (uint16_t) data[1];
@@ -42,11 +44,23 @@ String parse_string_field(uint8_t data[]){
     return String((char*) data);
 }
 
+std::vector<String> parse_decimal_array_field(uint8_t data[], size_t size, uint8_t scale) {
+    Serial.println("Got array field. Size: " + String(size));
+    std::vector<String> v;
+    v.reserve(size);
+    for (size_t i = 0; i < size; ++i) {
+        String s = String(parse_decimal_field(data + i*2, scale), 2);
+        v.push_back(s);
+        Serial.println(String(i) + ": " + s);
+    }
+    return v;
+}
+
 String pase_enum_field(uint8_t data[]){
     return "";
 }
 
-int process_data_field(uint8_t page, uint8_t offset, uint8_t* pData, size_t length, const device_field_data_t field, String* ret) {
+int process_data_field(uint8_t page, uint8_t offset, uint8_t* pData, size_t length, const device_field_data_t field, std::vector<String>* ret) {
     // filter fields not in range
     Serial.println(String("process_data_field(") + page + ", " + (int)offset + ", " + (int)pData + "," + length + ", {" 
         + map_field_name(field.f_name) + ", " +
@@ -57,18 +71,19 @@ int process_data_field(uint8_t page, uint8_t offset, uint8_t* pData, size_t leng
     
     int data_start = (2* ((int)field.f_offset - (int)offset)) + HEADER_SIZE;
     Serial.println(String("data_start: ") + data_start); 
-    int data_end = (data_start + 2 * field.f_size);
+    int data_end = (data_start + 2 * field.f_size) -1;
     Serial.println(String("data_end: ") + data_end); 
     
-    Serial.println(String("cond: ") + (data_end)  + " < " + (length) );
+    Serial.println(String("cond: ") + (data_end)  + " < " + (length-2) );
 
     if(field.f_page == page &&
        data_start >= 0 &&
-       data_end >= 0 &&
-       data_end <= length
+       data_start <= data_end &&
+       data_end <= length -2
       ){
+        Serial.println("PASSED");
 
-        uint8_t data_payload_field[data_end - data_start];
+        uint8_t data_payload_field[data_end - data_start +1];
 
         int p_index = 0;
         for (int i=data_start; i<= data_end; i++){
@@ -79,30 +94,34 @@ int process_data_field(uint8_t page, uint8_t offset, uint8_t* pData, size_t leng
         switch (field.f_type){
 
           case UINT_FIELD:
-            *ret = String(parse_uint_field(data_payload_field));
+            ret->push_back(String(parse_uint_field(data_payload_field)));
             break;
           case BOOL_FIELD:
-            *ret = String((int)parse_bool_field(data_payload_field));
+            ret->push_back(String((int)parse_bool_field(data_payload_field)));
             break;
           case DECIMAL_FIELD:
-            *ret = String(parse_decimal_field(data_payload_field, field.f_scale ), 2);
+            ret->push_back(String(parse_decimal_field(data_payload_field, field.f_scale ), 2));
             break;
           case SN_FIELD:
             char sn[16];
             snprintf(sn, 15, "%lld", parse_serial_field(data_payload_field));
             sn[15] = '\0';
-            *ret = String(sn);
+            ret->push_back(String(sn));
             break;
           case VERSION_FIELD:
-            *ret = String(parse_version_field(data_payload_field),2);
+            ret->push_back(String(parse_version_field(data_payload_field),2));
             break;
           case STRING_FIELD:
-            *ret = parse_string_field(data_payload_field);
+            ret->push_back(parse_string_field(data_payload_field));
             break;
           case ENUM_FIELD:
-            *ret = pase_enum_field(data_payload_field);
+            ret->push_back(pase_enum_field(data_payload_field));
+            break;
+          case DECIMAL_ARRAY_FIELD:
+            *ret = parse_decimal_array_field(data_payload_field, field.f_size, field.f_scale);
             break;
           default:
+            Serial.println("Invalid field type: " + String(field.f_type));
             return 2;
 
         }
@@ -112,24 +131,34 @@ int process_data_field(uint8_t page, uint8_t offset, uint8_t* pData, size_t leng
     return 1;
 }
 
+int process_data_field(uint8_t page, uint8_t offset, uint8_t* pData, size_t length, const device_field_data_t field, String* ret) {
+    std::vector<String> vec;
+    int r = process_data_field(page, offset, pData, length, field, &vec);
+    if (!vec.empty()) {
+        *ret = vec[0];
+    }
+    return r;
+}
+
+
 void parse_data_fields(uint8_t page, uint8_t offset, uint8_t* pData, size_t length, device_field_data_t* fields_to_parse, size_t array_length) {
     for(int i=0; i< array_length; i++){
-        String s;
-        int ret = process_data_field(page, offset, pData, length, bluetti_device_state_common[i], &s);
+        std::vector<String> vec;
+        int ret = process_data_field(page, offset, pData, length, fields_to_parse[i], &vec);
         if (ret == 0) {
-            ds.updateValue(bluetti_device_state_common[i].f_name, s);
+            ds.updateValue(fields_to_parse[i].f_name, vec);
         }
     }
 }
 
 void pase_bluetooth_data(uint8_t page, uint8_t offset, uint8_t* pData, size_t length){
+    static String device_value;
     Serial.println(String("pase_bluetooth_data(") + page + ", " + offset + ", pdata, " + length + ")");
     switch(pData[1]){
       // range request
 
       case 0x03:
         ESPBluettiSettings settings = get_esp32_bluetti_settings();
-        String device_value;
         int d_ret = process_data_field(page, offset, pData, length, device_entry, &device_value);
         String serial_value;
         int s_ret = process_data_field(page, offset, pData, length, serial_entry, &serial_value);
@@ -146,6 +175,7 @@ void pase_bluetooth_data(uint8_t page, uint8_t offset, uint8_t* pData, size_t le
         parse_data_fields(page, offset, pData, length, bluetti_device_state_common, sizeof(bluetti_device_state_common)/sizeof(device_field_data_t));
 
         if (device_value == "AC200M") {
+            setState(PACK_NUM, 1);
             parse_data_fields(page, offset, pData, length, bluetti_device_state_ac200m, sizeof(bluetti_device_state_ac200m)/sizeof(device_field_data_t));
         } else if (device_value == "AC300") {
             parse_data_fields(page, offset, pData, length, bluetti_device_state_ac300, sizeof(bluetti_device_state_ac300)/sizeof(device_field_data_t));
