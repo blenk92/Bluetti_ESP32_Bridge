@@ -160,17 +160,14 @@ void pase_bluetooth_data(uint8_t page, uint8_t offset, uint8_t* pData, size_t le
       case 0x03:
         ESPBluettiSettings settings = get_esp32_bluetti_settings();
         int d_ret = process_data_field(page, offset, pData, length, device_entry, &device_value);
-        String serial_value;
-        int s_ret = process_data_field(page, offset, pData, length, serial_entry, &serial_value);
 
-        if ((d_ret != 1 && s_ret != 1) &&  String(settings.bluetti_device_id) != (device_value + serial_value)) {
+        if (d_ret != 1 && device_value == "") {
             Serial.println("Got invalid data. Rebooting...");
             Serial.println("device: " + device_value);
-            Serial.println("serial: " + serial_value);
+            Serial.println("Got: " + String(settings.bluetti_device_id));
             ESP.restart();
-        } else if (d_ret == 0 && s_ret == 0) {
+        } else if (d_ret == 0) {
             ds.updateValue(device_entry.f_name, device_value);
-            ds.updateValue(serial_entry.f_name, serial_value);
         } 
         parse_data_fields(page, offset, pData, length, bluetti_device_state_common, sizeof(bluetti_device_state_common)/sizeof(device_field_data_t));
 

@@ -19,6 +19,7 @@ static device_field_data_t bluetti_device_state_common[] = {
   {DC_OUTPUT_ON,      0x00, 0x31, 1, 0, 0, BOOL_FIELD},
   {PACK_NUM_MAX,      0x00, 0x5B, 1, 0, 0, UINT_FIELD},
   {CELL_VOLTAGES,     0x00, 0x69, 16, 2, 0, DECIMAL_ARRAY_FIELD},
+  {SERIAL_NUMBER,     0x00, 0x11, 4, 0 ,0, SN_FIELD},
 };
 
 static device_field_data_t bluetti_device_command[] = {
